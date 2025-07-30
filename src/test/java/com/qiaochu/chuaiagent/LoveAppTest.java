@@ -45,5 +45,12 @@ class LoveAppTest {
         String answer =  loveApp.doChatWithRag(message, chatId);
         Assertions.assertNotNull(answer);
     }
+    @Test
+    void doChatWithRagCloud() {
+        String chatId = UUID.randomUUID().toString();
+        String message = "第一次见面需要注意什么";
+        String answer =  loveApp.doChatWithRagCloud(message, chatId);
+        Assertions.assertNotNull(answer);
+    }
 
 }

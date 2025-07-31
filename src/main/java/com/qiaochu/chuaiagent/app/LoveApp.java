@@ -4,6 +4,7 @@ package com.qiaochu.chuaiagent.app;
 import com.qiaochu.chuaiagent.advisor.MyLoggerAdvisor;
 import com.qiaochu.chuaiagent.advisor.ReReadingAdvisor;
 import com.qiaochu.chuaiagent.chatmemory.FileBasedChatMemory;
+import com.qiaochu.chuaiagent.rag.PgVectorVectorStoreConfig;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -28,6 +29,9 @@ public class LoveApp {
 
     @Resource
     private VectorStore loveAppVectorStore;
+
+    @Resource
+    private Advisor loveAppRagCloudAdvisor;
 
     public record LoveReport(String title, List<String> suggestions) {}
 
@@ -96,8 +100,7 @@ public class LoveApp {
         log.info("content: {}", content);
         return content;
     }
-    @Resource
-    private Advisor loveAppRagCloudAdvisor;
+
 
     public String doChatWithRagCloud(String message, String chatId) {
         ChatResponse chatResponse = chatClient

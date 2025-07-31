@@ -1,4 +1,4 @@
-package com.qiaochu.chuaiagent.config;
+package com.qiaochu.chuaiagent.rag;
 
 import com.alibaba.cloud.ai.dashscope.api.DashScopeApi;
 import com.alibaba.cloud.ai.dashscope.rag.DashScopeDocumentRetriever;

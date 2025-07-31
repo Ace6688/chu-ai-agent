@@ -2,9 +2,9 @@ package com.qiaochu.chuaiagent.app;
 
 
 import com.qiaochu.chuaiagent.advisor.MyLoggerAdvisor;
-import com.qiaochu.chuaiagent.advisor.ReReadingAdvisor;
 import com.qiaochu.chuaiagent.chatmemory.FileBasedChatMemory;
-import com.qiaochu.chuaiagent.rag.PgVectorVectorStoreConfig;
+import com.qiaochu.chuaiagent.rag.LoveAppRagCustomAdvisorFactory;
+import com.qiaochu.chuaiagent.rag.QueryRewriter;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -12,7 +12,6 @@ import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -28,7 +27,9 @@ import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvis
 public class LoveApp {
 
     @Resource
-    private VectorStore loveAppVectorStore;
+    private QueryRewriter queryRewriter;
+    @Resource
+    private VectorStore pgVectorVectorStore;
 
     @Resource
     private Advisor loveAppRagCloudAdvisor;
@@ -85,15 +86,20 @@ public class LoveApp {
 
 
     public String doChatWithRag(String message, String chatId) {
+        String queryRewrite = queryRewriter.doQueryRewrite(message);
+
         ChatResponse chatResponse = chatClient
                 .prompt()
-                .user(message)
+                .user(queryRewrite)
                 .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
                         .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
                 // 开启日志，便于观察效果
                 .advisors(new MyLoggerAdvisor())
                 // 应用知识库问答
-                .advisors(new QuestionAnswerAdvisor(loveAppVectorStore))
+                .advisors(new QuestionAnswerAdvisor(pgVectorVectorStore))
+                .advisors(LoveAppRagCustomAdvisorFactory.createLoveAppRagCustomAdvisor(
+                        pgVectorVectorStore, "已婚"
+                ))
                 .call()
                 .chatResponse();
         String content = chatResponse.getResult().getOutput().getText();

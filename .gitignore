@@ -7,6 +7,8 @@ target/
 **/application.yml
 **/TestApiKey.java
 **/document
+**/mcp-servers.json
+chat-memory
 ### STS ###
 .apt_generated
 .classpath
